@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/home_screen.dart';
 
-void main() {
-  runApp(const PhoneDineApp());
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
+  runApp(const MyApp());
 }
 
-class PhoneDineApp extends StatelessWidget {
-  const PhoneDineApp({super.key});
-
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PhoneDine',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      title: 'Phonedine',
+      theme: ThemeData(useMaterial3: true),
       home: const HomeScreen(),
     );
   }

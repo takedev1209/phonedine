@@ -5,15 +5,32 @@
 .flutter-plugins-dependencies
 .metadata
 build/
-pubspec.lock
 
-# IDE
+# .envファイル
+.env
+
+# IDE settings
 .idea/
 .vscode/
 *.iml
 
+# Android specific
+android/.gradle/
+android/captures/
+
+# iOS specific
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# Xcode specific
+*.xcodeproj/*
+*.xcworkspace/*
+DerivedData/
+
 # macOS
 .DS_Store
 
-# Others
+# Log files
 *.log

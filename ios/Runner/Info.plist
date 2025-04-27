@@ -49,7 +49,12 @@
 	<key>NSContactsUsageDescription</key>
 	<string>連絡帳にアクセスします</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>現在地を利用します</string>
+	<string>このアプリでは現在地を使用して近くのお店を検索します。</string>
+
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+	</array>
 
 </dict>
 </plist>
