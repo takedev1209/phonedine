@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,6 +28,29 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, String>> _places = [];
   bool _isLoading = false;
   String _searchKeyword = '';
+  String? _errorMessage;
+
+  // 連絡先をアルファベットごとにグループ化する関数
+  Map<String, List<Contact>> _groupContacts(List<Contact> contacts) {
+    final Map<String, List<Contact>> grouped = {};
+    for (final contact in contacts) {
+      String key = '';
+      if (contact.name.isNotEmpty) {
+        key = contact.name[0].toUpperCase();
+        if (!RegExp(r'[A-Z]').hasMatch(key)) {
+          key = '#';
+        }
+      } else {
+        key = '#';
+      }
+      grouped.putIfAbsent(key, () => []).add(contact);
+    }
+    final sortedKeys = grouped.keys.toList()..sort();
+    final Map<String, List<Contact>> sortedGrouped = {
+      for (var k in sortedKeys) k: grouped[k]!,
+    };
+    return sortedGrouped;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +62,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   c.phoneNumber.contains(_searchKeyword),
             )
             .toList();
+    final groupedContacts = _groupContacts(filteredContacts);
 
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('連絡先'),
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('連絡先'),
         previousPageTitle: 'リスト',
-        trailing: Icon(CupertinoIcons.add),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Icon(CupertinoIcons.refresh),
+          onPressed: _requestPermissions,
+        ),
       ),
       child: SafeArea(
         child: Column(
@@ -63,26 +92,60 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      _errorMessage!,
+                      style: const TextStyle(
+                        color: CupertinoColors.destructiveRed,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    CupertinoButton(
+                      child: const Text('設定を開く'),
+                      onPressed: openAppSettings,
+                    ),
+                  ],
+                ),
+              ),
             Expanded(
               child:
                   _isLoading
                       ? const Center(child: CupertinoActivityIndicator())
-                      : ListView(
-                        children: [
-                          if (filteredContacts.isNotEmpty)
-                            ...filteredContacts.map(
-                              (c) => ContactTile(contact: c),
-                            ),
-                          if (_places.isNotEmpty) const Divider(),
-                          ..._places.map(
-                            (place) => ListTile(
-                              title: Text(place['name'] ?? ''),
-                              subtitle: Text(
-                                '${place['rating']} ⭐ - ${place['address']}',
+                      : ListView.builder(
+                        itemCount: groupedContacts.length,
+                        itemBuilder: (context, sectionIndex) {
+                          final sectionKey = groupedContacts.keys.elementAt(
+                            sectionIndex,
+                          );
+                          final sectionContacts = groupedContacts[sectionKey]!;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0,
+                                  vertical: 8.0,
+                                ),
+                                child: Text(
+                                  sectionKey,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: CupertinoColors.systemGrey,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ],
+                              ...sectionContacts.map(
+                                (c) => ContactTile(contact: c),
+                              ),
+                            ],
+                          );
+                        },
                       ),
             ),
           ],
@@ -123,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
             results
                 .where((place) {
                   final rating = (place['rating'] ?? 0).toDouble();
-                  return rating >= 4.0; // ★ここを設定変更可能に拡張可
+                  return rating >= 4.0;
                 })
                 .map<Map<String, String>>((place) {
                   return {
@@ -145,6 +208,54 @@ class _HomeScreenState extends State<HomeScreen> {
     } finally {
       setState(() {
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _requestPermissions() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // 連絡先と位置情報の権限を同時にリクエスト
+      Map<Permission, PermissionStatus> statuses =
+          await [Permission.contacts, Permission.location].request();
+
+      // 権限の状態を確認
+      bool contactsGranted = statuses[Permission.contacts]?.isGranted ?? false;
+      bool locationGranted = statuses[Permission.location]?.isGranted ?? false;
+
+      if (!contactsGranted || !locationGranted) {
+        setState(() {
+          _errorMessage = 'アプリの使用には連絡先と位置情報の権限が必要です。設定から許可してください。';
+        });
+        return;
+      }
+
+      // 権限が許可された場合、連絡先を取得
+      await _fetchContacts();
+    } catch (e) {
+      setState(() {
+        _errorMessage = '権限の確認中にエラーが発生しました: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _fetchContacts() async {
+    try {
+      // ここで端末の連絡先を取得する処理を実装
+      // 例: contacts_serviceパッケージを使う場合
+      // Iterable<device_contacts.Contact> contacts = await device_contacts.ContactsService.getContacts(withThumbnails: false);
+      // setState(() { ... });
+    } catch (e) {
+      setState(() {
+        _errorMessage = '連絡先の取得中にエラーが発生しました: $e';
       });
     }
   }

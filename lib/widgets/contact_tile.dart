@@ -27,7 +27,7 @@ class ContactTile extends StatelessWidget {
     return Container(
       height: 0.5,
       color: CupertinoColors.separator,
-      margin: const EdgeInsets.only(left: 16),
+      width: double.infinity,
     );
   }
 
@@ -36,14 +36,17 @@ class ContactTile extends StatelessWidget {
     return Column(
       children: [
         _buildSeparator(),
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => _navigateToDetail(context),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _call(contact.phoneNumber),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 10.0,
+              horizontal: 16.0,
+            ),
+            child: Row(
+              children: [
+                Expanded(
                   child: Text(
                     contact.name,
                     style: TextStyle(
@@ -56,18 +59,8 @@ class ContactTile extends StatelessWidget {
                     maxLines: 1,
                   ),
                 ),
-              ),
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                minSize: 30,
-                onPressed: () => _call(contact.phoneNumber),
-                child: const Icon(
-                  CupertinoIcons.phone,
-                  size: 24,
-                  color: CupertinoColors.activeBlue,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
