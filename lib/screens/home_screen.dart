@@ -18,28 +18,115 @@ class _HomeScreenState extends State<HomeScreen> {
     Contact(name: 'Daniel Higgins Jr.', phoneNumber: '080-4444-4444'),
     Contact(name: 'David Taylor', phoneNumber: '080-5555-5555'),
     Contact(name: 'Hank M. Zakroff', phoneNumber: '080-6666-6666'),
+    Contact(name: 'たけうち　しょうたろう', phoneNumber: '080-6666-6666'),
+    Contact(name: 'さとう　たける', phoneNumber: '080-6666-6666'),
+    Contact(name: 'よしおか　あきら', phoneNumber: '080-6666-6666'),
+    Contact(name: 'ぱしおか　あきら', phoneNumber: '080-6666-6666'),
   ];
 
   bool _isLoading = false;
   String _searchKeyword = '';
   String? _errorMessage;
 
-  // 連絡先をアルファベットごとにグループ化する関数
+  // ひらがな・カタカナ・漢字の先頭文字を五十音の行頭に変換する関数
+  String _getKanaGroup(String name) {
+    if (name.isEmpty) return '#';
+    final first = name[0];
+    // ひらがな・カタカナをひらがなに正規化
+    final hira = first.replaceAllMapped(
+      RegExp(r'[ァ-ン]'),
+      (m) => String.fromCharCode(m[0]!.codeUnitAt(0) - 0x60),
+    );
+    // 五十音の行頭リスト
+    const List<String> gojuon = [
+      'あ',
+      'か',
+      'さ',
+      'た',
+      'な',
+      'は',
+      'ま',
+      'や',
+      'ら',
+      'わ',
+    ];
+    const List<List<String>> gojuonTable = [
+      ['あ', 'い', 'う', 'え', 'お'],
+      ['か', 'き', 'く', 'け', 'こ', 'が', 'ぎ', 'ぐ', 'げ', 'ご'],
+      ['さ', 'し', 'す', 'せ', 'そ', 'ざ', 'じ', 'ず', 'ぜ', 'ぞ'],
+      ['た', 'ち', 'つ', 'て', 'と', 'だ', 'ぢ', 'づ', 'で', 'ど'],
+      ['な', 'に', 'ぬ', 'ね', 'の'],
+      [
+        'は',
+        'ひ',
+        'ふ',
+        'へ',
+        'ほ',
+        'ば',
+        'び',
+        'ぶ',
+        'べ',
+        'ぼ',
+        'ぱ',
+        'ぴ',
+        'ぷ',
+        'ぺ',
+        'ぽ',
+      ],
+      ['ま', 'み', 'む', 'め', 'も'],
+      ['や', 'ゆ', 'よ'],
+      ['ら', 'り', 'る', 'れ', 'ろ'],
+      ['わ', 'を', 'ん'],
+    ];
+    for (int i = 0; i < gojuonTable.length; i++) {
+      if (gojuonTable[i].contains(hira)) {
+        return gojuon[i];
+      }
+    }
+    // 英字の場合は大文字で返す
+    if (RegExp(r'[A-Za-z]').hasMatch(first)) {
+      return first.toUpperCase();
+    }
+    // それ以外は#
+    return '#';
+  }
+
+  // 連絡先をアルファベット・五十音ごとにグループ化する関数
   Map<String, List<Contact>> _groupContacts(List<Contact> contacts) {
     final Map<String, List<Contact>> grouped = {};
     for (final contact in contacts) {
-      String key = '';
-      if (contact.name.isNotEmpty) {
-        key = contact.name[0].toUpperCase();
-        if (!RegExp(r'[A-Z]').hasMatch(key)) {
-          key = '#';
-        }
-      } else {
-        key = '#';
-      }
+      String key = _getKanaGroup(contact.name);
       grouped.putIfAbsent(key, () => []).add(contact);
     }
-    final sortedKeys = grouped.keys.toList()..sort();
+    final sortedKeys =
+        grouped.keys.toList()..sort((a, b) {
+          // 五十音順＋アルファベット順＋#
+          const gojuonOrder = [
+            'あ',
+            'か',
+            'さ',
+            'た',
+            'な',
+            'は',
+            'ま',
+            'や',
+            'ら',
+            'わ',
+          ];
+          if (gojuonOrder.contains(a) && gojuonOrder.contains(b)) {
+            return gojuonOrder.indexOf(a).compareTo(gojuonOrder.indexOf(b));
+          } else if (gojuonOrder.contains(a)) {
+            return -1;
+          } else if (gojuonOrder.contains(b)) {
+            return 1;
+          } else if (a == '#') {
+            return 1;
+          } else if (b == '#') {
+            return -1;
+          } else {
+            return a.compareTo(b);
+          }
+        });
     final Map<String, List<Contact>> sortedGrouped = {
       for (var k in sortedKeys) k: grouped[k]!,
     };
