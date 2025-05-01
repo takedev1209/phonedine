@@ -1,11 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import '../models/contact.dart';
 import '../widgets/contact_tile.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,7 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
     Contact(name: 'Hank M. Zakroff', phoneNumber: '080-6666-6666'),
   ];
 
-  List<Map<String, String>> _places = [];
   bool _isLoading = false;
   String _searchKeyword = '';
   String? _errorMessage;
@@ -70,8 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
         previousPageTitle: 'リスト',
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          child: const Icon(CupertinoIcons.refresh),
           onPressed: _requestPermissions,
+          child: const Icon(CupertinoIcons.refresh),
         ),
       ),
       child: SafeArea(
@@ -88,7 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   setState(() {
                     _searchKeyword = value;
                   });
-                  _searchNearbyPlaces(value);
                 },
               ),
             ),
@@ -105,8 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 8),
                     CupertinoButton(
-                      child: const Text('設定を開く'),
                       onPressed: openAppSettings,
+                      child: const Text('設定を開く'),
                     ),
                   ],
                 ),
@@ -152,64 +145,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _searchNearbyPlaces(String keyword) async {
-    if (keyword.isEmpty) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      final apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
-      final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/place/nearbysearch/json'
-        '?location=${position.latitude},${position.longitude}'
-        '&radius=2000'
-        '&keyword=$keyword'
-        '&type=restaurant'
-        '&key=$apiKey',
-      );
-
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final results = data['results'] as List;
-
-        final filtered =
-            results
-                .where((place) {
-                  final rating = (place['rating'] ?? 0).toDouble();
-                  return rating >= 4.0;
-                })
-                .map<Map<String, String>>((place) {
-                  return {
-                    'name': place['name'],
-                    'rating': place['rating'].toString(),
-                    'address': place['vicinity'] ?? '',
-                  };
-                })
-                .toList();
-
-        setState(() {
-          _places = filtered;
-        });
-      } else {
-        print("Failed to fetch places: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error: $e");
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
 
   Future<void> _requestPermissions() async {

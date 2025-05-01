@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/contact.dart';
+import 'dart:developer' as developer;
 
 class ContactDetailScreen extends StatelessWidget {
   final Contact contact;
@@ -49,7 +50,8 @@ class ContactDetailScreen extends StatelessWidget {
               // onPressed: () => _call(contact.phoneNumber),
               onPressed: () {
                 // debugPrint('📞 発信先: ${contact.phoneNumber}');
-                print('📞 発信先: ${contact.phoneNumber}');
+                developer.log('📞 発信先: ${contact.phoneNumber}');
+
                 _call(contact.phoneNumber);
               },
             ),

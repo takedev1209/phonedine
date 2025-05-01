@@ -1,25 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/contact.dart';
-import '../screens/contact_detail_screen.dart';
+import 'dart:developer' as developer;
 
 class ContactTile extends StatelessWidget {
   final Contact contact;
 
   const ContactTile({super.key, required this.contact});
 
-  void _navigateToDetail(BuildContext context) {
-    Navigator.of(context).push(
-      CupertinoPageRoute(builder: (_) => ContactDetailScreen(contact: contact)),
-    );
-  }
-
   void _call(String number) async {
     final Uri telUri = Uri(scheme: 'tel', path: number);
     if (await canLaunchUrl(telUri)) {
       await launchUrl(telUri);
     } else {
-      print('電話をかけられません');
+      developer.log('電話をかけられません');
     }
   }
 
