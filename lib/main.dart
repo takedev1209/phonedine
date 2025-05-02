@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/home_screen.dart';
+import 'package:flutter/cupertino.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
@@ -11,9 +12,12 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return CupertinoApp(
       title: 'Phonedine',
-      theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false,
+      theme: const CupertinoThemeData(
+        primaryColor: CupertinoColors.systemBlue,
+      ),
       home: const HomeScreen(),
     );
   }
