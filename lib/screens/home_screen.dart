@@ -132,9 +132,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    CupertinoButton(
+                    const CupertinoButton(
                       onPressed: openAppSettings,
-                      child: const Text('設定を開く'),
+                      child: Text('設定を開く'),
                     ),
                   ],
                 ),

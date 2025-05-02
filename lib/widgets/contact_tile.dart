@@ -38,7 +38,7 @@ class ContactTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   contact.name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 17,
                     color: CupertinoColors.label,
                     fontWeight: FontWeight.normal,
@@ -52,18 +52,18 @@ class ContactTile extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 minSize: 30,
                 onPressed: () => _call(contact.phoneNumber),
-                child: Icon(
+                child: const Icon(
                   Icons.circle,
                   size: 11,
                   color: CupertinoColors.activeBlue,
                 ),
               ),
-              SizedBox(width: 5.0),
+              const SizedBox(width: 5.0),
               CupertinoButton(
                 padding: EdgeInsets.zero,
                 minSize: 30,
                 onPressed: () => _call(contact.phoneNumber),
-                child: Icon(
+                child: const Icon(
                   Icons.circle,
                   size: 11,
                   color: CupertinoColors.activeGreen,
