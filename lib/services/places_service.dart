@@ -23,4 +23,16 @@ class PlacesService {
       throw Exception('Failed to load places');
     }
   }
+
+  Future<String?> getPhoneNumber(String placeId) async {
+    final url =
+        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&fields=formatted_phone_number&key=${dotenv.env['GOOGLE_MAPS_API_KEY']}';
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['result']?['formatted_phone_number'];
+    } else {
+      return null;
+    }
+  }
 }

@@ -4,6 +4,7 @@ import '../models/contact.dart' as app_contact;
 import '../widgets/contact_tile.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import '../services/places_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,9 +15,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<app_contact.Contact> _contacts = [];
+  List<app_contact.Contact> _placesContacts = [];
   bool _isLoading = false;
   String _searchKeyword = '';
   String? _errorMessage;
+  final PlacesService _placesService = PlacesService();
 
   @override
   void initState() {
@@ -83,6 +86,43 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _onSearchChanged(String value) async {
+    setState(() {
+      _searchKeyword = value;
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    if (value.isEmpty) {
+      setState(() {
+        _placesContacts = [];
+        _isLoading = false;
+      });
+      return;
+    }
+    try {
+      // 仮で東京駅周辺の緯度経度を使用
+      const tokyoStation = '35.681236,139.767125';
+      final results = await _placesService.searchPlaces(value, tokyoStation);
+      setState(() {
+        _placesContacts = results
+            .map((place) => app_contact.Contact(
+                  name: place['name'] ?? '名称不明',
+                  phoneNumber: '', // 詳細取得時に取得
+                  latitude: place['geometry']?['location']?['lat']?.toDouble(),
+                  longitude: place['geometry']?['location']?['lng']?.toDouble(),
+                  placeId: place['place_id'],
+                ))
+            .toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Googleスポット検索中にエラーが発生しました: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final filteredContacts = _contacts
@@ -90,9 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
             c.name.toLowerCase().contains(_searchKeyword.toLowerCase()) ||
             c.phoneNumber.contains(_searchKeyword))
         .toList();
-
-    // 連絡先をグループ化
-    final groupedContacts = _groupContacts(filteredContacts);
+    final groupedContacts = _groupContacts(
+      _searchKeyword.isEmpty ? filteredContacts : _placesContacts,
+    );
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
@@ -113,11 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: CupertinoSearchTextField(
                 placeholder: '検索',
-                onChanged: (value) {
-                  setState(() {
-                    _searchKeyword = value;
-                  });
-                },
+                onChanged: _onSearchChanged,
               ),
             ),
             if (_errorMessage != null)
