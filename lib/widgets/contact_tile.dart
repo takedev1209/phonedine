@@ -48,15 +48,35 @@ class ContactTile extends StatelessWidget {
 
   void _openMapOrCall(BuildContext context) async {
     if (contact.latitude != null && contact.longitude != null) {
-      // Google Mapsの経路案内URL
-      final url = Uri.parse(
-        'https://www.google.com/maps/dir/?api=1&destination=${contact.latitude},${contact.longitude}&travelmode=walking',
-      );
+      Uri url;
+      if (contact.placeId != null && contact.placeId!.isNotEmpty) {
+        // Place IDがある場合はGoogleマップの店舗詳細画面を開く
+        final encodedName = Uri.encodeComponent(contact.name);
+        url = Uri.parse(
+          'https://www.google.com/maps/search/?api=1&query=$encodedName&query_place_id=${contact.placeId}',
+        );
+      } else {
+        // Place IDがなければ従来通り経路案内
+        final encodedName = Uri.encodeComponent(contact.name);
+        url = Uri.parse(
+          'https://www.google.com/maps/dir/?api=1&destination=$encodedName@${contact.latitude},${contact.longitude}&travelmode=walking',
+        );
+      }
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('地図アプリを開けませんでした')),
+        showCupertinoDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: const Text('エラー'),
+            content: const Text('地図アプリを開けませんでした'),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('OK'),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
         );
       }
     } else {
