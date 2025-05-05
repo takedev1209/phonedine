@@ -47,5 +47,7 @@
 	<true/>
 	<key>NSContactsUsageDescription</key>
 	<string>連絡先を表示するために、連絡先へのアクセス許可が必要です。</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>現在地周辺の店舗を検索するために、位置情報のアクセス許可が必要です。</string>
 </dict>
 </plist>

@@ -5,6 +5,7 @@ import '../widgets/contact_tile.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import '../services/places_service.dart';
+import 'package:location/location.dart' as loc;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String _searchKeyword = '';
   String? _errorMessage;
   final PlacesService _placesService = PlacesService();
+  loc.LocationData? _currentLocation;
+  final loc.Location _location = loc.Location();
 
   @override
   void initState() {
@@ -34,14 +37,23 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-      // まず現在の権限状態を確認
-      bool hasPermission = await FlutterContacts.requestPermission();
-
-      if (hasPermission) {
+      // 連絡先と位置情報の両方の権限を確認
+      final contactsGranted = await Permission.contacts.request();
+      final locationGranted = await Permission.locationWhenInUse.request();
+      if (contactsGranted.isGranted && locationGranted.isGranted) {
         await _fetchContacts();
+        final serviceEnabled = await _location.serviceEnabled();
+        if (!serviceEnabled) {
+          await _location.requestService();
+        }
+        final permissionGranted = await _location.hasPermission();
+        if (permissionGranted == loc.PermissionStatus.denied) {
+          await _location.requestPermission();
+        }
+        _currentLocation = await _location.getLocation();
       } else {
         setState(() {
-          _errorMessage = '連絡先へのアクセス権限が必要です。設定から許可してください。';
+          _errorMessage = '連絡先と位置情報の権限が必要です。設定から許可してください。';
         });
       }
     } catch (e) {
@@ -100,9 +112,16 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
     try {
-      // 仮で東京駅周辺の緯度経度を使用
-      const tokyoStation = '35.681236,139.767125';
-      final results = await _placesService.searchPlaces(value, tokyoStation);
+      // 現在地が取得できていればそれを使う
+      String location;
+      if (_currentLocation != null) {
+        location =
+            '${_currentLocation!.latitude},${_currentLocation!.longitude}';
+      } else {
+        // 取得できていなければ東京駅をデフォルト
+        location = '35.681236,139.767125';
+      }
+      final results = await _placesService.searchPlaces(value, location);
       setState(() {
         _placesContacts = results
             .map((place) => app_contact.Contact(
