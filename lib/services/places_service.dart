@@ -18,7 +18,33 @@ class PlacesService {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return List<Map<String, dynamic>>.from(data['results']);
+      List<Map<String, dynamic>> results =
+          List<Map<String, dynamic>>.from(data['results']);
+      // 上位20件を対象に並列でPlace Details APIを呼び出し（多めに取得しておく）
+      final topResults = results.take(20).toList();
+      final openNowResults = await Future.wait(topResults.map((place) async {
+        final placeId = place['place_id'];
+        final openNow = await getOpenNow(placeId);
+        return {'place': place, 'openNow': openNow};
+      }));
+      // 営業中のみ抽出
+      final openNowList = openNowResults
+          .where((result) => result['openNow'] == true)
+          .map((result) => result['place'] as Map<String, dynamic>)
+          .toList();
+      // ratingとuser_ratings_totalでソートし、上位10件のみ返す
+      openNowList.sort((a, b) {
+        double ratingA = (a['rating'] ?? 0).toDouble();
+        double ratingB = (b['rating'] ?? 0).toDouble();
+        int reviewsA = (a['user_ratings_total'] ?? 0) as int;
+        int reviewsB = (b['user_ratings_total'] ?? 0) as int;
+        if (ratingA != ratingB) {
+          return ratingB.compareTo(ratingA);
+        } else {
+          return reviewsB.compareTo(reviewsA);
+        }
+      });
+      return openNowList.take(10).toList();
     } else {
       throw Exception('Failed to load places');
     }
@@ -31,6 +57,18 @@ class PlacesService {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       return data['result']?['formatted_phone_number'];
+    } else {
+      return null;
+    }
+  }
+
+  Future<bool?> getOpenNow(String placeId) async {
+    final url =
+        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&fields=opening_hours&language=ja&key=${dotenv.env['GOOGLE_MAPS_API_KEY']}';
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['result']?['opening_hours']?['open_now'];
     } else {
       return null;
     }

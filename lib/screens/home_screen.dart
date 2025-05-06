@@ -149,9 +149,9 @@ class _HomeScreenState extends State<HomeScreen> {
             c.name.toLowerCase().contains(_searchKeyword.toLowerCase()) ||
             c.phoneNumber.contains(_searchKeyword))
         .toList();
-    final groupedContacts = _groupContacts(
-      _searchKeyword.isEmpty ? filteredContacts : _placesContacts,
-    );
+
+    final groupedContacts = _groupContacts(filteredContacts);
+    final hasSearchResults = _placesContacts.isNotEmpty;
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
@@ -197,36 +197,35 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: _isLoading
                   ? const Center(child: CupertinoActivityIndicator())
-                  : ListView.builder(
-                      itemCount: groupedContacts.length,
-                      itemBuilder: (context, sectionIndex) {
-                        final sectionKey =
-                            groupedContacts.keys.elementAt(sectionIndex);
-                        final sectionContacts = groupedContacts[sectionKey]!;
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 8.0,
-                              ),
-                              child: Text(
-                                sectionKey,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: CupertinoColors.systemGrey,
-                                  decoration: TextDecoration.none,
-                                  fontFamily: '.SF Pro Text',
+                  : ListView(
+                      children: [
+                        if (hasSearchResults)
+                          ..._placesContacts
+                              .map((c) => ContactTile(contact: c)),
+                        ...groupedContacts.entries.map((entry) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0,
+                                    vertical: 8.0,
+                                  ),
+                                  child: Text(
+                                    entry.key,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: CupertinoColors.systemGrey,
+                                      decoration: TextDecoration.none,
+                                      fontFamily: '.SF Pro Text',
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            ...sectionContacts
-                                .map((c) => ContactTile(contact: c)),
-                          ],
-                        );
-                      },
+                                ...entry.value
+                                    .map((c) => ContactTile(contact: c)),
+                              ],
+                            )),
+                      ],
                     ),
             ),
           ],
