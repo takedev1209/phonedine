@@ -182,6 +182,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 onChanged: (value) {
                   setState(() {
                     _searchKeyword = value;
+                    if (value.isEmpty) {
+                      _placesContacts = [];
+                    }
                   });
                 },
                 onSubmitted: _onSearchChanged,
