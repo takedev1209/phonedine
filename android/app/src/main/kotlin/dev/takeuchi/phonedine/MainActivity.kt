@@ -1,4 +1,4 @@
-package com.example.phonedine
+package dev.takeuchi.phonedine
 
 import io.flutter.embedding.android.FlutterActivity
 
