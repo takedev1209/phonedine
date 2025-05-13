@@ -6,7 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import '../services/places_service.dart';
 import 'package:location/location.dart' as loc;
-import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final PlacesService _placesService = PlacesService();
   loc.LocationData? _currentLocation;
   final loc.Location _location = loc.Location();
-  Timer? _debounce;
 
   @override
   void initState() {
@@ -101,52 +99,47 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _onSearchChanged(String value) async {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () async {
-      setState(() {
-        _searchKeyword = value;
-        _isLoading = true;
-        _errorMessage = null;
-      });
-      if (value.isEmpty) {
-        setState(() {
-          _placesContacts = [];
-          _isLoading = false;
-        });
-        return;
-      }
-      try {
-        // 現在地が取得できていればそれを使う
-        String location;
-        if (_currentLocation != null) {
-          location =
-              '${_currentLocation!.latitude},${_currentLocation!.longitude}';
-        } else {
-          // 取得できていなければ東京駅をデフォルト
-          location = '35.681236,139.767125';
-        }
-        final results = await _placesService.searchPlaces(value, location);
-        setState(() {
-          _placesContacts = results
-              .map((place) => app_contact.Contact(
-                    name: place['name'] ?? '名称不明',
-                    phoneNumber: '', // 詳細取得時に取得
-                    latitude:
-                        place['geometry']?['location']?['lat']?.toDouble(),
-                    longitude:
-                        place['geometry']?['location']?['lng']?.toDouble(),
-                    placeId: place['place_id'],
-                  ))
-              .toList();
-          _isLoading = false;
-        });
-      } catch (e) {
-        setState(() {
-          _errorMessage = 'Googleスポット検索中にエラーが発生しました: $e';
-          _isLoading = false;
-        });
-      }
+    setState(() {
+      _searchKeyword = value;
+      _isLoading = true;
+      _errorMessage = null;
     });
+    if (value.isEmpty) {
+      setState(() {
+        _placesContacts = [];
+        _isLoading = false;
+      });
+      return;
+    }
+    try {
+      // 現在地が取得できていればそれを使う
+      String location;
+      if (_currentLocation != null) {
+        location =
+            '${_currentLocation!.latitude},${_currentLocation!.longitude}';
+      } else {
+        // 取得できていなければ東京駅をデフォルト
+        location = '35.681236,139.767125';
+      }
+      final results = await _placesService.searchPlaces(value, location);
+      setState(() {
+        _placesContacts = results
+            .map((place) => app_contact.Contact(
+                  name: place['name'] ?? '名称不明',
+                  phoneNumber: '', // 詳細取得時に取得
+                  latitude: place['geometry']?['location']?['lat']?.toDouble(),
+                  longitude: place['geometry']?['location']?['lng']?.toDouble(),
+                  placeId: place['place_id'],
+                ))
+            .toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Googleスポット検索中にエラーが発生しました: $e';
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -253,7 +246,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _debounce?.cancel();
     super.dispose();
   }
 
