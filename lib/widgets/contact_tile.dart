@@ -105,9 +105,10 @@ class ContactTile extends StatelessWidget {
                 child: Text(
                   contact.name,
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
+                    height: 1.5,
                     color: CupertinoColors.label,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     decoration: TextDecoration.none,
                   ),
                   overflow: TextOverflow.ellipsis,
