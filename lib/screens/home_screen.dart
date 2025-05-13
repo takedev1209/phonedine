@@ -212,35 +212,37 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: _isLoading
                   ? const Center(child: CupertinoActivityIndicator())
-                  : ListView(
-                      children: [
-                        if (hasSearchResults)
-                          ..._placesContacts
-                              .map((c) => ContactTile(contact: c)),
-                        ...groupedContacts.entries.map((entry) => Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0,
-                                    vertical: 8.0,
-                                  ),
-                                  child: Text(
-                                    entry.key,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: CupertinoColors.systemGrey,
-                                      decoration: TextDecoration.none,
-                                      fontFamily: '.SF Pro Text',
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: ListView(
+                        children: [
+                          if (hasSearchResults)
+                            ..._placesContacts
+                                .map((c) => ContactTile(contact: c)),
+                          ...groupedContacts.entries.map((entry) => Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8.0,
+                                    ),
+                                    child: Text(
+                                      entry.key,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: CupertinoColors.systemGrey,
+                                        decoration: TextDecoration.none,
+                                        fontFamily: '.SF Pro Text',
+                                      ),
                                     ),
                                   ),
-                                ),
-                                ...entry.value
-                                    .map((c) => ContactTile(contact: c)),
-                              ],
-                            )),
-                      ],
+                                  ...entry.value
+                                      .map((c) => ContactTile(contact: c)),
+                                ],
+                              )),
+                        ],
+                      ),
                     ),
             ),
           ],

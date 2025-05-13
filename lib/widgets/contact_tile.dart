@@ -98,16 +98,16 @@ class ContactTile extends StatelessWidget {
       children: [
         _buildSeparator(),
         Container(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
           child: Row(
             children: [
               Expanded(
                 child: Text(
                   contact.name,
                   style: const TextStyle(
-                    fontSize: 17,
+                    fontSize: 20,
                     color: CupertinoColors.label,
-                    fontWeight: FontWeight.normal,
+                    fontWeight: FontWeight.bold,
                     decoration: TextDecoration.none,
                   ),
                   overflow: TextOverflow.ellipsis,
