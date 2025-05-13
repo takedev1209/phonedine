@@ -100,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _onSearchChanged(String value) async {
     setState(() {
-      _searchKeyword = value;
       _isLoading = true;
       _errorMessage = null;
     });
@@ -144,13 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredContacts = _contacts
-        .where((c) =>
-            c.name.toLowerCase().contains(_searchKeyword.toLowerCase()) ||
-            c.phoneNumber.contains(_searchKeyword))
-        .toList();
-
-    final groupedContacts = _groupContacts(filteredContacts);
+    final groupedContacts = _groupContacts(_contacts);
     final hasSearchResults = _placesContacts.isNotEmpty;
 
     return CupertinoPageScaffold(
@@ -174,7 +167,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 placeholder: '検索',
                 onChanged: (value) {
                   setState(() {
-                    _searchKeyword = value;
                     if (value.isEmpty) {
                       _placesContacts = [];
                     }
@@ -209,9 +201,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: ListView(
                         children: [
-                          if (hasSearchResults)
+                          if (_placesContacts.isNotEmpty) ...[
                             ..._placesContacts
                                 .map((c) => ContactTile(contact: c)),
+                            const SizedBox(height: 16.0),
+                            Container(
+                              height: 1,
+                              color: CupertinoColors.separator,
+                            ),
+                            const SizedBox(height: 16.0),
+                          ],
                           ...groupedContacts.entries.map((entry) => Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
