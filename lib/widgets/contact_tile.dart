@@ -26,6 +26,7 @@ class ContactTile extends StatelessWidget {
     } else if (contact.placeId != null) {
       // Place Details APIで電話番号取得
       final phone = await _placesService.getPhoneNumber(contact.placeId!);
+      if (!context.mounted) return;
       if (phone != null && phone.isNotEmpty) {
         _call(phone);
       } else {
@@ -65,6 +66,7 @@ class ContactTile extends StatelessWidget {
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
+        if (!context.mounted) return;
         showCupertinoDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(

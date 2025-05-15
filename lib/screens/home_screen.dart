@@ -18,7 +18,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<app_contact.Contact> _contacts = [];
   List<app_contact.Contact> _placesContacts = [];
   bool _isLoading = false;
-  String _searchKeyword = '';
   String? _errorMessage;
   final PlacesService _placesService = PlacesService();
   loc.LocationData? _currentLocation;
@@ -144,7 +143,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final groupedContacts = _groupContacts(_contacts);
-    final hasSearchResults = _placesContacts.isNotEmpty;
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
