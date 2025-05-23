@@ -1,0 +1,14 @@
+{
+    "contacts": "連絡先",
+    "search": "検索",
+    "noPhoneNumber": "電話番号なし",
+    "noPhoneNumberMessage": "この店舗の電話番号は取得できませんでした",
+    "error": "エラー",
+    "cannotOpenMap": "地図アプリを開けませんでした",
+    "ok": "OK",
+    "settings": "設定を開く",
+    "permissionRequired": "連絡先と位置情報の権限が必要です。設定から許可してください。",
+    "permissionError": "権限の確認中にエラーが発生しました: {error}",
+    "contactsError": "連絡先の取得中にエラーが発生しました: {error}",
+    "placesError": "Googleスポット検索中にエラーが発生しました: {error}"
+} 

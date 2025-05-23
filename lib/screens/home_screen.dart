@@ -6,6 +6,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import '../services/places_service.dart';
 import 'package:location/location.dart' as loc;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -142,11 +144,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final groupedContacts = _groupContacts(_contacts);
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('連絡先'),
+        middle: Text(l10n.contacts),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _checkPermissions,
@@ -162,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 vertical: 8.0,
               ),
               child: CupertinoSearchTextField(
-                placeholder: '検索',
+                placeholder: l10n.search,
                 onChanged: (value) {
                   setState(() {
                     if (value.isEmpty) {
@@ -185,9 +188,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const CupertinoButton(
+                    CupertinoButton(
                       onPressed: openAppSettings,
-                      child: Text('設定を開く'),
+                      child: Text(l10n.settings),
                     ),
                   ],
                 ),

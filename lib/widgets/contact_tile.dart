@@ -4,6 +4,7 @@ import '../models/contact.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import '../services/places_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ContactTile extends StatelessWidget {
   final Contact contact;
@@ -30,14 +31,15 @@ class ContactTile extends StatelessWidget {
       if (phone != null && phone.isNotEmpty) {
         _call(phone);
       } else {
+        final l10n = AppLocalizations.of(context)!;
         showCupertinoDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: const Text('電話番号なし'),
-            content: const Text('この店舗の電話番号は取得できませんでした'),
+            title: Text(l10n.noPhoneNumber),
+            content: Text(l10n.noPhoneNumberMessage),
             actions: [
               CupertinoDialogAction(
-                child: const Text('OK'),
+                child: Text(l10n.ok),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],
@@ -67,14 +69,15 @@ class ContactTile extends StatelessWidget {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
         if (!context.mounted) return;
+        final l10n = AppLocalizations.of(context)!;
         showCupertinoDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: const Text('エラー'),
-            content: const Text('地図アプリを開けませんでした'),
+            title: Text(l10n.error),
+            content: Text(l10n.cannotOpenMap),
             actions: [
               CupertinoDialogAction(
-                child: const Text('OK'),
+                child: Text(l10n.ok),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],

@@ -1,0 +1,14 @@
+{
+    "contacts": "Contacts",
+    "search": "Search",
+    "noPhoneNumber": "No Phone Number",
+    "noPhoneNumberMessage": "Could not get the phone number for this place",
+    "error": "Error",
+    "cannotOpenMap": "Could not open map application",
+    "ok": "OK",
+    "settings": "Open Settings",
+    "permissionRequired": "Contacts and location permissions are required. Please enable them in settings.",
+    "permissionError": "Error checking permissions: {error}",
+    "contactsError": "Error fetching contacts: {error}",
+    "placesError": "Error searching Google Places: {error}"
+} 
