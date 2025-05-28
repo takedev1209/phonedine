@@ -205,28 +205,28 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (_placesContacts.isNotEmpty) ...[
                             ..._placesContacts
                                 .map((c) => ContactTile(contact: c)),
-                            const SizedBox(height: 16.0),
                             Container(
-                              height: 1,
+                              height: 0.5,
                               color: CupertinoColors.separator,
+                              width: double.infinity,
                             ),
-                            const SizedBox(height: 16.0),
                           ],
                           ...groupedContacts.entries.map((entry) => Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 8.0,
+                                    padding: const EdgeInsets.only(
+                                      top: 24.0,
+                                      bottom: 8.0,
                                     ),
                                     child: Text(
                                       entry.key,
                                       style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: CupertinoColors.systemGrey,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14,
+                                        color: CupertinoColors.black,
                                         decoration: TextDecoration.none,
-                                        fontFamily: '.SF Pro Text',
+                                        fontFamily: 'Roboto',
                                       ),
                                     ),
                                   ),
