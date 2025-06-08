@@ -19,8 +19,21 @@ class MyApp extends StatelessWidget {
     return CupertinoApp(
       navigatorKey: navigatorKey,
       title: 'Phonedine',
-      theme: const CupertinoThemeData(
+      debugShowCheckedModeBanner: false,
+      theme: CupertinoThemeData(
         primaryColor: CupertinoColors.systemBlue,
+        brightness: MediaQuery.platformBrightnessOf(context),
+        scaffoldBackgroundColor:
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                ? CupertinoColors.black
+                : CupertinoColors.systemBackground,
+        textTheme: CupertinoTextThemeData(
+          textStyle: TextStyle(
+            color: MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                ? CupertinoColors.white
+                : CupertinoColors.black,
+          ),
+        ),
       ),
       localizationsDelegates: const [
         AppLocalizations.delegate,

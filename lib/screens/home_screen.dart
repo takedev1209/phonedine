@@ -115,11 +115,19 @@ class _HomeScreenState extends State<HomeScreen> {
       // 現在地が取得できていればそれを使う
       String location;
       if (_currentLocation != null) {
-        location =
-            '${_currentLocation!.latitude},${_currentLocation!.longitude}';
+        final lat = _currentLocation!.latitude;
+        final lng = _currentLocation!.longitude;
+        // 日本国外の位置の場合は新宿駅を使用
+        if (lat != null &&
+            lng != null &&
+            (lat < 20 || lat > 46 || lng < 122 || lng > 154)) {
+          location = '35.689606,139.700571'; // 新宿駅
+        } else {
+          location = '${lat ?? 35.689606},${lng ?? 139.700571}';
+        }
       } else {
-        // 取得できていなければ東京駅をデフォルト
-        location = '35.681236,139.767125';
+        // 取得できていなければ新宿駅をデフォルト
+        location = '35.689606,139.700571';
       }
       final results = await _placesService.searchPlaces(value, location);
       setState(() {
@@ -146,14 +154,26 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final groupedContacts = _groupContacts(_contacts);
+    final isDarkMode =
+        MediaQuery.platformBrightnessOf(context) == Brightness.dark;
 
     return CupertinoPageScaffold(
+      backgroundColor:
+          isDarkMode ? CupertinoColors.black : CupertinoColors.systemBackground,
       navigationBar: CupertinoNavigationBar(
-        middle: Text(l10n.contacts),
+        middle: Text(
+          l10n.contacts,
+          style: TextStyle(
+            color: isDarkMode ? CupertinoColors.white : CupertinoColors.black,
+          ),
+        ),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _checkPermissions,
-          child: const Icon(CupertinoIcons.refresh),
+          child: Icon(
+            CupertinoIcons.refresh,
+            color: isDarkMode ? CupertinoColors.white : CupertinoColors.black,
+          ),
         ),
       ),
       child: SafeArea(
@@ -207,7 +227,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 .map((c) => ContactTile(contact: c)),
                             Container(
                               height: 0.5,
-                              color: CupertinoColors.separator,
+                              color: isDarkMode
+                                  ? CupertinoColors.systemGrey.withOpacity(0.6)
+                                  : CupertinoColors.separator,
                               width: double.infinity,
                             ),
                           ],
@@ -221,10 +243,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     child: Text(
                                       entry.key,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.w700,
                                         fontSize: 14,
-                                        color: CupertinoColors.black,
+                                        color: isDarkMode
+                                            ? CupertinoColors.white
+                                            : CupertinoColors.black,
                                         decoration: TextDecoration.none,
                                         fontFamily: 'Roboto',
                                       ),

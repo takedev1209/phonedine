@@ -89,19 +89,26 @@ class ContactTile extends StatelessWidget {
     }
   }
 
-  Widget _buildSeparator() {
+  Widget _buildSeparator(BuildContext context) {
+    final isDarkMode =
+        MediaQuery.platformBrightnessOf(context) == Brightness.dark;
     return Container(
       height: 0.5,
-      color: CupertinoColors.separator,
+      color: isDarkMode
+          ? CupertinoColors.systemGrey.withOpacity(0.6)
+          : CupertinoColors.separator,
       width: double.infinity,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode =
+        MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+
     return Column(
       children: [
-        _buildSeparator(),
+        _buildSeparator(context),
         Container(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
           child: Row(
@@ -109,10 +116,12 @@ class ContactTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   contact.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     height: 1.5,
-                    color: CupertinoColors.label,
+                    color: isDarkMode
+                        ? CupertinoColors.white
+                        : CupertinoColors.label,
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.none,
                     fontFamily: 'Roboto',
