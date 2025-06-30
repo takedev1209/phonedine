@@ -2,7 +2,7 @@ name: phonedine
 description: "連絡先と位置情報を活用した店舗検索アプリ"
 
 publish_to: 'none'
-version: 1.0.4+5
+version: 1.0.5+6
 environment:
   sdk: '>=3.2.3 <4.0.0'
 dependencies:
