@@ -7,7 +7,6 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import '../services/places_service.dart';
 import 'package:location/location.dart' as loc;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<app_contact.Contact> _contacts = [];
   List<app_contact.Contact> _placesContacts = [];
   bool _isLoading = false;
+  bool _hasSearched = false; // 検索を実行したかどうかのフラグ
   String? _errorMessage;
   final PlacesService _placesService = PlacesService();
   loc.LocationData? _currentLocation;
@@ -103,11 +103,13 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _hasSearched = false;
     });
     if (value.isEmpty) {
       setState(() {
         _placesContacts = [];
         _isLoading = false;
+        _hasSearched = false;
       });
       return;
     }
@@ -130,6 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
         location = '35.689606,139.700571';
       }
       final results = await _placesService.searchPlaces(value, location);
+
       setState(() {
         _placesContacts = results
             .map((place) => app_contact.Contact(
@@ -141,11 +144,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ))
             .toList();
         _isLoading = false;
+        _hasSearched = true; // 検索完了をマーク
       });
     } catch (e) {
       setState(() {
         _errorMessage = 'Googleスポット検索中にエラーが発生しました: $e';
         _isLoading = false;
+        _hasSearched = true; // エラーでも検索完了としてマーク
       });
     }
   }
@@ -190,6 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   setState(() {
                     if (value.isEmpty) {
                       _placesContacts = [];
+                      _hasSearched = false; // 検索をリセット
                     }
                   });
                 },
@@ -233,31 +239,75 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: double.infinity,
                             ),
                           ],
-                          ...groupedContacts.entries.map((entry) => Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          // 検索結果が0件の場合のメッセージ
+                          if (_hasSearched &&
+                              _placesContacts.isEmpty &&
+                              _errorMessage == null)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 32.0),
+                              child: Column(
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      top: 24.0,
-                                      bottom: 8.0,
-                                    ),
-                                    child: Text(
-                                      entry.key,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14,
-                                        color: isDarkMode
-                                            ? CupertinoColors.white
-                                            : CupertinoColors.black,
-                                        decoration: TextDecoration.none,
-                                        fontFamily: 'Roboto',
-                                      ),
+                                  Icon(
+                                    CupertinoIcons.search,
+                                    size: 48,
+                                    color: isDarkMode
+                                        ? CupertinoColors.systemGrey
+                                        : CupertinoColors.systemGrey2,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    '検索結果が見つかりませんでした',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDarkMode
+                                          ? CupertinoColors.white
+                                          : CupertinoColors.black,
                                     ),
                                   ),
-                                  ...entry.value
-                                      .map((c) => ContactTile(contact: c)),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '別のキーワードで検索してみてください',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: isDarkMode
+                                          ? CupertinoColors.systemGrey
+                                          : CupertinoColors.systemGrey2,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ],
-                              )),
+                              ),
+                            ),
+                          // 連絡先リストの表示（検索結果がない場合のみ表示）
+                          if (!_hasSearched || _placesContacts.isEmpty) ...[
+                            ...groupedContacts.entries.map((entry) => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: 24.0,
+                                        bottom: 8.0,
+                                      ),
+                                      child: Text(
+                                        entry.key,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14,
+                                          color: isDarkMode
+                                              ? CupertinoColors.white
+                                              : CupertinoColors.black,
+                                          decoration: TextDecoration.none,
+                                          fontFamily: 'Roboto',
+                                        ),
+                                      ),
+                                    ),
+                                    ...entry.value
+                                        .map((c) => ContactTile(contact: c)),
+                                  ],
+                                )),
+                          ],
                         ],
                       ),
                     ),
