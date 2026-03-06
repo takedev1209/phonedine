@@ -24,7 +24,10 @@ dev_dependencies:
   change_app_package_name: ^1.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
+dependency_overrides:
+  flutter_contacts:
+    path: packages/flutter_contacts
 flutter:
   uses-material-design: true
   generate: true

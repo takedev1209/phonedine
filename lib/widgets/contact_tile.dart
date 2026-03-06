@@ -4,7 +4,7 @@ import '../models/contact.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import '../services/places_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 
 class ContactTile extends StatelessWidget {
   final Contact contact;
@@ -95,7 +95,7 @@ class ContactTile extends StatelessWidget {
     return Container(
       height: 0.5,
       color: isDarkMode
-          ? CupertinoColors.systemGrey.withOpacity(0.6)
+          ? CupertinoColors.systemGrey.withValues(alpha: 0.6)
           : CupertinoColors.separator,
       width: double.infinity,
     );
@@ -133,7 +133,7 @@ class ContactTile extends StatelessWidget {
               if (contact.latitude != null && contact.longitude != null)
                 CupertinoButton(
                   padding: EdgeInsets.zero,
-                  minSize: 30,
+                  minimumSize: const Size(30, 30),
                   onPressed: () => _openMapOrCall(context),
                   child: const Icon(
                     Icons.circle,
@@ -144,7 +144,7 @@ class ContactTile extends StatelessWidget {
               const SizedBox(width: 5.0),
               CupertinoButton(
                 padding: EdgeInsets.zero,
-                minSize: 30,
+                minimumSize: const Size(30, 30),
                 onPressed: () => _callOrFetchAndCall(context),
                 child: const Icon(
                   Icons.circle,

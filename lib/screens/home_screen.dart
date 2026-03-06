@@ -1,4 +1,5 @@
 // home_screen.dart
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import '../models/contact.dart' as app_contact;
 import '../widgets/contact_tile.dart';
@@ -6,7 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import '../services/places_service.dart';
 import 'package:location/location.dart' as loc;
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -43,15 +44,24 @@ class _HomeScreenState extends State<HomeScreen> {
       final locationGranted = await Permission.locationWhenInUse.request();
       if (contactsGranted.isGranted && locationGranted.isGranted) {
         await _fetchContacts();
-        final serviceEnabled = await _location.serviceEnabled();
-        if (!serviceEnabled) {
-          await _location.requestService();
+        try {
+          final serviceEnabled = await _location.serviceEnabled()
+              .timeout(const Duration(seconds: 5));
+          if (!serviceEnabled) {
+            await _location.requestService()
+                .timeout(const Duration(seconds: 5));
+          }
+          final permissionGranted = await _location.hasPermission()
+              .timeout(const Duration(seconds: 5));
+          if (permissionGranted == loc.PermissionStatus.denied) {
+            await _location.requestPermission()
+                .timeout(const Duration(seconds: 5));
+          }
+          _currentLocation = await _location.getLocation()
+              .timeout(const Duration(seconds: 10));
+        } catch (_) {
+          // 位置情報取得に失敗した場合はnullのまま（新宿駅にフォールバック）
         }
-        final permissionGranted = await _location.hasPermission();
-        if (permissionGranted == loc.PermissionStatus.denied) {
-          await _location.requestPermission();
-        }
-        _currentLocation = await _location.getLocation();
       } else {
         setState(() {
           _errorMessage = '連絡先と位置情報の権限が必要です。設定から許可してください。';
@@ -234,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Container(
                               height: 0.5,
                               color: isDarkMode
-                                  ? CupertinoColors.systemGrey.withOpacity(0.6)
+                                  ? CupertinoColors.systemGrey.withValues(alpha: 0.6)
                                   : CupertinoColors.separator,
                               width: double.infinity,
                             ),
